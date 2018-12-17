@@ -4,7 +4,7 @@ class Term
 	attr_reader :standard
 	attr_reader :count
 
-	def self.clean word
+	def Term.clean word
 		return nil unless word && word.is_a?(String)
 		
 		word = word[0..-3] if word.end_with?("'s")
@@ -43,6 +43,10 @@ end
 
 class Concordance
 	@@terms = Hash.new {|h,k| h[k] = Term.new(k)}
+
+	def initialize
+		throw "Concordance is static and cannot be instanciated"
+	end
 
 	def self.add_term word
 		var = self.is_known_variation(word)
@@ -105,14 +109,20 @@ def read_and_process_file fn
 	puts "... done. #{num_lines} line and #{num_words} words read; #{Concordance.count-terms_before} terms added."
 end
 
-dirname = ARGV[0]
-puts "========= EX1 Starting ========"
-puts "Looking in #{dirname}"
-Dir.glob("#{dirname}/*.txt") do |fn|
-  next if fn == '.' or fn == '..'
-  read_and_process_file fn
-end
+begin
+	dirname = ARGV[0]
+	puts "========= EX1 Starting ========"
+	puts "Looking in #{dirname}"
+	Dir.glob("#{dirname}/*.txt") do |fn|
+	  next if fn == '.' or fn == '..'
+	  read_and_process_file fn
+	end
 
-Concordance.output "concordance.csv"
-puts "Output created. Total of #{Concordance.count} terms found."
-puts "========= EX1 ended ========"
+	Concordance.output "concordance.csv"
+	puts "Output created. Total of #{Concordance.count} terms found."
+	puts "========= EX1 ended ========"	
+rescue StandardError => e
+	puts "Error in ex1: #{e.message}"
+	puts e.backtrace[0]
+	puts e.backtrace[1]
+end
